@@ -1,0 +1,10 @@
+Dataset,Method,TA (%),FA (%),RA (%),MIA (%),Runtime (ms),Privacy
+CIFAR10,Gradient-based Unlearning,83.57,45.7,87.78,47.0,30030.59,0.5671
+CIFAR10,Influence Function,85.15,57.2,88.26,47.52,30235.99,0.452
+CIFAR10,Hessian-guided Gradient Unlearning,83.84,48.4,87.78,47.03,40806.44,0.5392
+CIFAR100,Gradient-based Unlearning,60.98,7.0,61.53,75.24,184758.75,0.4652
+CIFAR100,Influence Function,61.21,22.0,61.61,75.24,185669.16,0.3902
+CIFAR100,Hessian-guided Gradient Unlearning,61.26,31.0,61.57,75.24,125995.11,0.3452
+FASHION_MNIST,Gradient-based Unlearning,90.4,52.7,94.59,42.68,38928.91,0.4486
+FASHION_MNIST,Influence Function,91.77,66.6,94.57,43.01,22372.33,0.3192
+FASHION_MNIST,Hessian-guided Gradient Unlearning,90.22,51.1,94.57,42.64,30464.8,0.4633

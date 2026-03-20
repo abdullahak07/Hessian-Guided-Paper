@@ -1,0 +1,5 @@
+Dataset,Architecture,Parameters (M),Runtime (ms),TA (%),FA (%),Privacy
+CIFAR10,resnet18,11.17,16871.0,83.98,40.3,0.6191
+CIFAR10,vgg16,23.63,13882.7,73.21,49.6,0.5587
+CIFAR100,resnet18,11.22,132566.1,61.53,38.0,0.3097
+CIFAR100,vgg16,23.68,136175.4,16.51,9.0,0.4258

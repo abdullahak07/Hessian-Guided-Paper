@@ -1,0 +1,13 @@
+Dataset,Method,TA (%),FA (%),RA (%),MIA (%),Runtime (ms),Privacy
+CIFAR10,Gradient-based Unlearning,83.56,45.7,87.77,47.01,54987.71,0.5672
+CIFAR10,Influence Function,85.15,57.2,88.26,47.52,49938.0,0.452
+CIFAR10,Hessian-guided Gradient Unlearning,83.84,48.4,87.78,47.03,50282.31,0.5393
+CIFAR10,SISA Training,81.57,22.8,88.1,46.67,254940.56,0.8006
+CIFAR10,Exact Unlearning via Retraining,81.59,22.8,88.12,46.67,255976.07,0.8006
+CIFAR10,Certified Data Removal,85.67,60.1,88.51,47.98,88338.06,0.4254
+CIFAR100,Gradient-based Unlearning,60.98,7.0,61.53,75.24,194067.53,0.4652
+CIFAR100,Influence Function,61.21,22.0,61.61,75.24,190639.3,0.3902
+CIFAR100,Hessian-guided Gradient Unlearning,61.26,31.0,61.57,75.24,130813.76,0.3452
+CIFAR100,SISA Training,59.7,14.0,60.16,75.24,1228766.61,0.4302
+CIFAR100,Exact Unlearning via Retraining,59.69,14.0,60.15,75.24,1211408.39,0.4302
+CIFAR100,Certified Data Removal,64.91,15.0,65.41,75.24,280639.22,0.4252
