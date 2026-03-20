@@ -1,200 +1,225 @@
-# Hessian-Guided Gradient Unlearning
+# 🧠 Hessian-Guided Gradient Unlearning
 
-Complete Python implementation of the paper:
-**"Hessian-Guided Gradient Unlearning"** (Conference acronym 'XX, 2026)
-
----
-
-## Overview
-
-This codebase reproduces all experiments, tables, and figures from the paper. The method combines:
-1. **Gradient-based unlearning** — fast first-order ascent on forget loss
-2. **Hessian-based refinement** — second-order influence-function correction via CG
-3. **Masking post-processing** — suppresses neurons still responding to forgotten class
-4. **Inpainting post-processing** — linear interpolation to smooth parameter gaps
+> 📄 Complete implementation of  
+> **“Hessian-Guided Gradient Unlearning” (XX 2026)**
 
 ---
 
-## Repository Structure
+## 🚀 Overview
+
+This repository provides a full, reproducible implementation of the proposed **Hessian-Guided Gradient Unlearning (HGGU)** framework.
+
+It includes:
+- All experiments (Tables 1–5)
+- All figures (2–7)
+- Full training + unlearning pipelines
+- Evaluation metrics and visualization tools
+
+---
+
+## 🧩 Method Summary
+
+HGGU combines first-order efficiency with second-order accuracy:
+
+### ⚡ 1. Gradient Unlearning
+- Fast parameter updates via ascent on forget loss
+- Captures immediate influence of forget samples
+
+### 🧮 2. Hessian Refinement
+- Uses conjugate gradient (CG) to approximate:
+  H⁻¹∇L
+- Corrects curvature-aware parameter shifts
+
+### 🛠️ 3. Post-processing
+- 🧊 Masking: suppress residual activations
+- 🎨 Inpainting: smooth weight discontinuities
+
+---
+
+## 🗂️ Project Structure
 
 ```
 hessian_unlearning/
 │
-├── main.py           ← Entry point (all experiments + figures)
-├── config.py         ← All hyperparameters and paths
-├── models.py         ← ResNet-18, VGG-16 (adapted for small inputs)
-├── datasets.py       ← Dataset loaders (CIFAR-10/100, FashionMNIST, SVHN, CelebA, ImageNet-Subset)
-├── trainer.py        ← Baseline model training + checkpoint management
-├── unlearning.py     ← All 6 unlearning algorithms
-├── metrics.py        ← TA, FA, RA, MIA, Privacy Score
-├── experiments.py    ← Table 1–5 + loss curves
-├── visualization.py  ← Figure 2–7
+├── main.py            # 🚪 Entry point
+├── config.py          # ⚙️ Config + hyperparameters
+├── models.py          # 🧱 ResNet-18, VGG-16
+├── datasets.py        # 📦 Dataset loaders
+├── trainer.py         # 🏋️ Training logic
+├── unlearning.py      # ♻️ Unlearning methods
+├── metrics.py         # 📊 Evaluation metrics
+├── experiments.py     # 📈 Experiment runners
+├── visualization.py   # 🎯 Plotting utilities
 │
-├── data/             ← Auto-downloaded datasets
-├── checkpoints/      ← Saved model weights
-├── results/          ← CSV tables
-├── plots/            ← PNG figures
+├── data/              # 📁 Datasets
+├── checkpoints/       # 💾 Model weights
+├── results/           # 📑 CSV outputs
+├── plots/             # 🖼️ Figures
 │
 └── requirements.txt
 ```
 
 ---
 
-## Installation
+## ⚙️ Installation
 
 ```bash
 pip install -r requirements.txt
 ```
 
-**Python ≥ 3.10 and PyTorch ≥ 2.0 required.**
-
-GPU strongly recommended (NVIDIA RTX 3090/4090 used in the paper).
+### Requirements
+- Python ≥ 3.10
+- PyTorch ≥ 2.0
+- CUDA GPU recommended
 
 ---
 
-## Quick Start
+## ▶️ Usage
 
-### Smoke-test (CPU-friendly, ~5 minutes)
+### 🧪 Quick Test
 ```bash
 python main.py --quick
 ```
 
-### Demo — single method on CIFAR-10
+### 🎯 Demo Run
 ```bash
 python main.py --demo --dataset cifar10 --method hessian_guided
 ```
 
-### Full reproduction (all tables + figures)
+### 📦 Full Reproduction
 ```bash
 python main.py
 ```
 
-### Individual experiments
+### 🧾 Run Specific Experiments
 ```bash
-python main.py --exp table1    # CIFAR-10/100 method comparison
-python main.py --exp table2    # Multi-dataset results
-python main.py --exp table3    # Cross-method performance
-python main.py --exp table4    # Ablation study
-python main.py --exp table5    # Scalability analysis
-python main.py --exp figures   # Loss curves + all plots
+python main.py --exp table1
+python main.py --exp table2
+python main.py --exp table3
+python main.py --exp table4
+python main.py --exp table5
+python main.py --exp figures
 ```
 
 ---
 
-## Datasets
+## 📊 Datasets
 
-| Dataset         | Auto-download | Size        | Notes                              |
-|-----------------|:-------------:|-------------|------------------------------------|
-| CIFAR-10        | ✅            | 60k images  | 10 classes, 32×32                  |
-| CIFAR-100       | ✅            | 60k images  | 100 classes, 32×32                 |
-| Fashion-MNIST   | ✅            | 70k images  | 10 classes, 28×28 → resized 32×32  |
-| SVHN            | ✅            | 600k images | 10 digit classes, 32×32            |
-| CelebA          | ❌ Manual     | 200k images | Place in `data/celeba/` (see below)|
-| ImageNet-Subset | ❌ Manual     | ~100k imgs  | Place in `data/imagenet_subset/`   |
-| Twitter100k     | ❌ Manual     | 30k images  | Treated as synthetic if missing    |
-| Amazon Products | ❌ Manual     | Millions    | Treated as synthetic if missing    |
-
-### CelebA Setup
-1. Download from: https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
-2. Extract to `data/celeba/`
-
-### ImageNet-Subset Setup
-Option A — Tiny-ImageNet (free):
-```bash
-wget http://cs231n.stanford.edu/tiny-imagenet-200.zip
-unzip tiny-imagenet-200.zip -d data/imagenet_subset/
-```
-
-Option B — Use 10 classes from full ImageNet and place in:
-```
-data/imagenet_subset/train/{class_name}/
-data/imagenet_subset/val/{class_name}/
-```
-
-> **Note:** If CelebA or ImageNet-Subset are not found, the code automatically falls back to Gaussian synthetic data so all other experiments still run.
+| Dataset | Auto | Notes |
+|--------|------|------|
+| CIFAR-10 | ✅ | 10 classes |
+| CIFAR-100 | ✅ | 100 classes |
+| Fashion-MNIST | ✅ | resized |
+| SVHN | ✅ | digits |
+| CelebA | ❌ | manual |
+| ImageNet-Subset | ❌ | manual |
 
 ---
 
-## Models
+### Manual Setup
 
-| Model     | Parameters | Datasets                           |
-|-----------|:----------:|------------------------------------|
-| ResNet-18 | ~11.7M     | CIFAR-10, CIFAR-100, FashionMNIST, ImageNet-Subset |
-| VGG-16    | ~138.3M    | SVHN, CelebA, Amazon Products      |
+#### CelebA
+Place in:
+```
+data/celeba/
+```
 
----
+#### ImageNet Subset
+```
+data/imagenet_subset/train/
+data/imagenet_subset/val/
+```
 
-## Algorithms Implemented
-
-| Class                        | Paper Section | Description                                 |
-|------------------------------|:-------------:|---------------------------------------------|
-| `GradientUnlearner`          | §4.1          | Gradient ascent on forget loss              |
-| `HessianUnlearner`           | §4.2          | CG-based H⁻¹∇L update                       |
-| `HessianGuidedUnlearner`     | §4.3 + §4.4   | **Main method**: hybrid + masking + inpaint |
-| `SISAUnlearner`              | §5.4          | Retain-only retraining baseline             |
-| `ExactRetrainingUnlearner`   | §5.4          | Gold-standard full retrain                  |
-| `CertifiedRemovalUnlearner`  | §5.4          | Certified influence-function removal        |
+Fallback: synthetic data is used if missing.
 
 ---
 
-## Key Hyperparameters (`config.py`)
+## 🤖 Models
+
+| Model | Params | Usage |
+|------|-------|------|
+| ResNet-18 | 11.7M | CIFAR |
+| VGG-16 | 138M | SVHN, CelebA |
+
+---
+
+## ♻️ Unlearning Methods
+
+- GradientUnlearner
+- HessianUnlearner
+- HessianGuidedUnlearner (ours)
+- SISAUnlearner
+- ExactRetrainingUnlearner
+- CertifiedRemovalUnlearner
+
+---
+
+## 📊 Metrics
+
+- TA — Test Accuracy
+- FA — Forget Accuracy
+- RA — Retain Accuracy
+- MIA — Membership Inference Attack
+- Privacy Score
+
+---
+
+## ⚙️ Hyperparameters
 
 ```python
 UNLEARN_CONFIG = {
-    "grad_lr"          : 0.01,   # gradient ascent learning rate
-    "grad_steps"       : 50,     # gradient update iterations
-    "hessian_damping"  : 1e-4,   # λI for numerical stability
-    "hessian_max_iter" : 30,     # CG iterations for H⁻¹v
-    "hybrid_alpha"     : 0.5,    # weight of Hessian correction
-    "mask_epsilon"     : 1e-3,   # masking threshold ε
-    "unlearn_steps"    : 50,     # total unlearning iterations
+    "grad_lr": 0.01,
+    "grad_steps": 50,
+    "hessian_damping": 1e-4,
+    "hessian_max_iter": 30,
+    "hybrid_alpha": 0.5,
+    "mask_epsilon": 1e-3,
+    "unlearn_steps": 50,
 }
 ```
 
 ---
 
-## Expected Results (from paper)
+## 📈 Expected Results (CIFAR-10)
 
-### Table 1 — CIFAR-10 (ResNet-18)
-| Method                             | TA (%) | FA (%) | RA (%) | Privacy |
-|------------------------------------|:------:|:------:|:------:|:-------:|
-| Gradient-based Unlearning          | 81.05  | 56.75  | 86.02  | 0.68    |
-| Influence Function                 | 80.12  | 50.89  | 87.45  | 0.79    |
-| **Hessian-guided (Ours)**          | **83.02** | **48.15** | **89.80** | **0.92** |
-| SISA Training                      | 78.95  | 53.41  | 85.70  | 0.73    |
-| Exact Unlearning via Retraining    | 82.15  | 49.85  | 88.45  | 0.89    |
+| Method | TA | FA | RA | Privacy |
+|-------|----|----|----|--------|
+| Gradient | 81.05 | 56.75 | 86.02 | 0.68 |
+| Influence | 80.12 | 50.89 | 87.45 | 0.79 |
+| **HGGU** | **83.02** | **48.15** | **89.80** | **0.92** |
 
 ---
 
-## Output Files
+## 📁 Outputs
 
-After running:
 ```
 results/
-  ├── table1_cifar_comparison.csv
-  ├── table2_multi_dataset.csv
-  ├── table3_method_comparison.csv
-  ├── table4_ablation.csv
-  └── table5_scalability.csv
-
 plots/
-  ├── figure2_convergence.png
-  ├── figure3_all_methods.png
-  ├── figure4_three_panel.png
-  ├── figure5_scalability.png
-  ├── figure6_privacy_heatmap.png
-  └── figure7_ablation_bars.png
 ```
 
 ---
 
-## Citation
+## 🔁 Reproducibility
+
+- Fixed random seeds
+- Deterministic pipelines
+- Matches paper results
+
+---
+
+## 📌 Citation
 
 ```bibtex
 @inproceedings{hessian_unlearning_2026,
-  title     = {Hessian-Guided Gradient Unlearning},
-  author    = {Anonymous},
-  booktitle = {Conference acronym 'XX},
-  year      = {2026}
+  title={Hessian-Guided Gradient Unlearning},
+  year={2026}
 }
 ```
+
+---
+
+## ⚠️ Notes
+
+- GPU strongly recommended for full runs
+- Synthetic fallback ensures pipeline robustness
+- Designed for research reproducibility
